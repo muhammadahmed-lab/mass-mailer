@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-950 text-white antialiased;
+}
+
+/* TipTap editor styles */
+.tiptap-editor .ProseMirror {
+  @apply min-h-[200px] p-4 outline-none text-slate-200 transition-all;
+}
+
+.tiptap-editor.expanded .ProseMirror {
+  @apply min-h-[500px];
+}
+
+/* Resize handle */
+.tiptap-editor .editor-wrapper {
+  resize: vertical;
+  overflow: auto;
+  min-height: 200px;
+  max-height: 70vh;
+}
+
+.tiptap-editor.expanded .editor-wrapper {
+  min-height: 500px;
+}
+
+/* Custom resize handle styling */
+.tiptap-editor .editor-wrapper::-webkit-resizer {
+  display: none;
+}
+
+.tiptap-editor .ProseMirror p {
+  @apply mb-2;
+}
+
+.tiptap-editor .ProseMirror h1 {
+  @apply text-2xl font-bold mb-3;
+}
+
+.tiptap-editor .ProseMirror h2 {
+  @apply text-xl font-semibold mb-2;
+}
+
+.tiptap-editor .ProseMirror ul {
+  @apply list-disc pl-6 mb-2;
+}
+
+.tiptap-editor .ProseMirror ol {
+  @apply list-decimal pl-6 mb-2;
+}
+
+.tiptap-editor .ProseMirror a {
+  @apply text-indigo-400 underline;
+}
+
+.tiptap-editor .ProseMirror s {
+  @apply line-through;
+}
+
+.tiptap-editor .ProseMirror:focus {
+  @apply outline-none;
+}
