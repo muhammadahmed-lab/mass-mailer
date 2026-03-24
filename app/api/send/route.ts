@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       const { inngest } = await import("@/app/lib/inngest");
       await inngest.send({
         name: "email/send.bulk",
-        data: { jobId, provider, from, subject, body, recipients, ...parsed.data },
+        data: { jobId, ...parsed.data },
       });
       useInngest = true;
     } catch {

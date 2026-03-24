@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 interface SmtpEmail {
   from: string;
@@ -26,7 +27,7 @@ export async function sendSmtpBatch(
     secure: true, // Port 465 uses implicit TLS (SMTPS)
     auth: { user: email, pass: appPassword },
     family: 4, // Force IPv4 — avoids ENETUNREACH on networks without IPv6
-  });
+  } as SMTPTransport.Options);
 
   // Verify connection first
   try {
