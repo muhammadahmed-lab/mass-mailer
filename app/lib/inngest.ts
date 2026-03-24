@@ -1,7 +1,8 @@
 import { Inngest } from "inngest";
 import { getJob, setJob, updateJob } from "@/app/lib/store";
 import { sendBatch } from "@/app/lib/resend";
-import type { Recipient, JobProgress } from "@/app/types";
+import { sendSmtpBatch } from "@/app/lib/smtp";
+import type { Recipient, JobProgress, EmailProvider } from "@/app/types";
 
 export const inngest = new Inngest({ id: "mass-mailer" });
 
@@ -17,7 +18,16 @@ export const sendBulkEmail = inngest.createFunction(
   { id: "send-bulk-email", retries: 2 },
   { event: "email/send.bulk" },
   async ({ event, step }) => {
-    const { jobId, from, subject, body, recipients, resendApiKey } = event.data;
+    const { jobId, provider, from, subject, body, recipients, resendApiKey, gmailAppPassword } = event.data as {
+      jobId: string;
+      provider: EmailProvider;
+      from: string;
+      subject: string;
+      body: string;
+      recipients: Recipient[];
+      resendApiKey?: string;
+      gmailAppPassword?: string;
+    };
 
     await step.run("init-progress", async () => {
       const initial: JobProgress = {
@@ -32,7 +42,8 @@ export const sendBulkEmail = inngest.createFunction(
       await setJob(jobId, initial);
     });
 
-    const chunks = chunkArray(recipients as Recipient[], 50);
+    const chunkSize = provider === "gmail" ? 10 : 50;
+    const chunks = chunkArray(recipients, chunkSize);
 
     for (let i = 0; i < chunks.length; i++) {
       await step.run(`send-batch-${i}`, async () => {
@@ -45,7 +56,10 @@ export const sendBulkEmail = inngest.createFunction(
           html: r.name ? body.replace(/\{\{name\}\}/g, r.name) : body,
         }));
 
-        const result = await sendBatch(resendApiKey, emails);
+        const result = provider === "gmail"
+          ? await sendSmtpBatch(from, gmailAppPassword!, emails)
+          : await sendBatch(resendApiKey!, emails);
+
         const current = await getJob(jobId);
 
         await updateJob(jobId, {
